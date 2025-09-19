@@ -146,7 +146,7 @@ void app_main(void) {
 	vector[3].pin=GPIO_23;
 	vector[3].dir=GPIO_OUTPUT;
 	
-	uint32_t numero_de_prueba=120; //lo interpreta en binario :)
+//	uint32_t numero_de_prueba=120; //lo interpreta en binario :)
 	coordina_displays (numero_de_prueba, 3, vector, vector_LCD);
 
 }
