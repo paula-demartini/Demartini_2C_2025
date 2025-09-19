@@ -6,45 +6,86 @@
  *
  * @section hardConn Hardware Connection
  *
- * |    Peripheral  |   ESP32   	|
+ * |    Periférico  |   EDU-ESP   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 	D1  	 	| 	GPIO_20		|
+ * | 	D2  	 	| 	GPIO_21		|
+ * | 	D3  	 	| 	GPIO_22		|
+ * | 	D4  	 	| 	GPIO_23		|
+ * | 	SEL_1	 	| 	GPIO_19		|
+ * | 	SEL_2	 	| 	GPIO_18		|
+ * | 	SEL_3	 	| 	GPIO_9		|
+ * | 	+5V 	 	|  	+5V     	|
+ * | 	GND 	 	| 	GND 		|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 12/09/2025 | Document creation		                         |
  *
  * @author Demartini Paula (paula.demartini@ingenieria.uner.edu.ar)
  *
  */
 
 /*==================[inclusions]=============================================*/
+
 #include <stdio.h>
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "led.h"
 #include "gpio_mcu.h"
+
 /*==================[macros and definitions]=================================*/
 
 /** @def numero_de_prueba 
-* @brief Número de prueba
+* @brief Número de prueba (120)
 */
 #define numero_de_prueba 120
+
+/** @def vector 
+* @brief Vector que guarda la información (pin y dir) de los GPIO de cada conversor BCD-7seg [D0, D1, D2 y D3]
+*/
+struct GPIO_DATA vector[4];
+
+/** @def vector_LCD
+* @brief Vector que guarda la información (pin y dir) de los GPIO de selección de los 3 conversores BCD-7seg [SEL_1, SEL_2, y SEL_3]
+*/
+struct GPIO_DATA vector_LCD[3];
 
 /*==================[internal data definition]===============================*/
 
 /*==================[internal functions declaration]=========================*/
 
-/** @fn void conversor_a_BCD()
-* @brief Convierte el número que se le pasa a BCD
-* @param 
+/** @fn void conversor_a_BCD(uint32_t data, uint8_t digits, uint8_t *BCD_digits)
+* @brief Convierte el número que se le pasa en binario natural a BCD
+* @param data Número binario a convertir
+* @param digits Cantidad de dígitos de salida
+* @param BCD_digits Arreglo donde se van a guardar dichos dígitos de salida
+* @return void
+*/
+void  conversor_a_BCD (uint32_t data, uint8_t digits, uint8_t *BCD_digits);
+
+/** @fn void distribuye_bits(int8_t numero, struct GPIO_DATA *vector)
+* @brief Distribuye los bits de un BCD en las 4 entradas del conversor BCD-7seg
+* @param numero Número en BCD
+* @param vector Vector de estructuras GPIO_DATA para mapear los bits a la entrada del conversor
 * @return
 */
-void  conversor_a_BCD (uint32_t data, uint8_t digits, uint8_t *BCD_digits); 
+void  distribuye_bits (int8_t numero, struct GPIO_DATA *vector);
+
+/** @fn void coordina_displays (int32_t data, int8_t digits, struct GPIO_DATA *vector1, struct GPIO_DATA *vector2)
+* @brief Reparte un máximo de 3 dígitos por display
+* @param data Número en binario natural
+* @param digits Cantidad de dígitos de salida
+* @param vector1 Vector de estructuras GPIO_DATA para mapear los bits a la entrada del conversor 
+* @param vector2 Vector de estructuras GPIO_DATA para selección el conversor
+* @return
+*/
+void coordina_displays (int32_t data, int8_t digits, struct GPIO_DATA *vector1, struct GPIO_DATA *vector2);
+
 
 
 void  conversor_a_BCD (uint32_t data, uint8_t digits, uint8_t *BCD_digits) //BCD_digits es el puntero a un vector vacío [ , , ] donde los elementos recibirán las posiciones o índices 0,1,2
