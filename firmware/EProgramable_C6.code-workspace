@@ -26,6 +26,9 @@
         },
         {
             "path": "projects/proyecto2"
+        },
+        {
+            "path": "projects/proyecto1_act2"
         }
     ],
     "settings": {

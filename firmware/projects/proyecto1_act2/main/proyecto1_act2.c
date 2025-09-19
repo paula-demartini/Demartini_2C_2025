@@ -44,25 +44,20 @@ void app_main(void){
     while(1)    {
 
     	teclas  = SwitchesRead();
+//		printf("Tecla presionada: %d\n", teclas);
 
-		if (teclas==SWITCH_1) {
-			LedToggle(LED_1);
-		} else if (teclas==SWITCH_2) {
-			LedToggle(LED_2);
-		} else if (teclas==SWITCH_1 AND teclas==SWITCH_2) {
-			LedToggle(LED_3);
-		}
-
-    	switch(teclas){
+	   	switch(teclas){
     		case SWITCH_1:
-    			LedToggle(LED_1);
+    			LedToggle(LED_1); //cambia el estado del LED
     		break;
     		case SWITCH_2:
     			LedToggle(LED_2);
     		break;
+			case SWITCH_1 | SWITCH_2:
+			LedToggle(LED_3);
+			break;
     	}
 
-	    LedToggle(LED_3);
-		vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
+		vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS); //retardo
 	}
 }
