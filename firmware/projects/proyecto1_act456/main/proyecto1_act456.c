@@ -1,10 +1,8 @@
-/*! @mainpage Template
+/*! @mainpage Proyecto 1: actividades 4, 5 y 6
  *
  * @section genDesc General Description
  *
- * This section describes how the program works.
- *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ * Resolución de las actividades 4, 5 y 6 del primer proyecto de electrónica programable
  *
  * @section hardConn Hardware Connection
  *
@@ -19,7 +17,7 @@
  * |:----------:|:-----------------------------------------------|
  * | 12/09/2023 | Document creation		                         |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Demartini Paula (paula.demartini@ingenieria.uner.edu.ar)
  *
  */
 
@@ -32,9 +30,22 @@
 #include "gpio_mcu.h"
 /*==================[macros and definitions]=================================*/
 
+/** @def numero_de_prueba 
+* @brief Número de prueba
+*/
+#define numero_de_prueba 120
+
 /*==================[internal data definition]===============================*/
 
 /*==================[internal functions declaration]=========================*/
+
+/** @fn void conversor_a_BCD()
+* @brief Convierte el número que se le pasa a BCD
+* @param 
+* @return
+*/
+void  conversor_a_BCD (uint32_t data, uint8_t digits, uint8_t *BCD_digits); 
+
 
 void  conversor_a_BCD (uint32_t data, uint8_t digits, uint8_t *BCD_digits) //BCD_digits es el puntero a un vector vacío [ , , ] donde los elementos recibirán las posiciones o índices 0,1,2
 
