@@ -124,6 +124,7 @@ static void revisaTeclas_task (void) {
 void app_main(void){
     LedsInit(); //inicializa los leds
 	LcdItsE0803Init(); //inicializa los displays(?)
+	SwitchesInit(); //inicializa las teclas
 	HcSr04Init(GPIO_3, GPIO_2); //inicializa el sensor
     xTaskCreate(&mideDistancia_Task, "Mide la distancia, maneja los leds y muestra por display", 2048, NULL, 5, &mideDistancia_task_handle);
     xTaskCreate(&revisaTeclas_task, "Revisa las teclas", 2048, NULL, 5, &revisaTeclas_task_handle);

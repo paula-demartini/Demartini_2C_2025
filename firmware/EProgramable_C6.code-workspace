@@ -25,10 +25,13 @@
             "path": "projects/proyecto1_act456"
         },
         {
-            "path": "projects/proyecto2"
+            "path": "projects/proyecto1_act2"
         },
         {
-            "path": "projects/proyecto1_act2"
+            "path": "projects/proyecto2_act1"
+        },
+        {
+            "path": "projects/proyecto2_act2"
         }
     ],
     "settings": {
