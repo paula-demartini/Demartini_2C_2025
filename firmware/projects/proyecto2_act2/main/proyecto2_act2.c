@@ -44,7 +44,7 @@ led_t vector_LEDS[3]={LED_1, LED_2, LED_3}; //vector de led_t
 
 /*==================[internal data definition]===============================*/
 
-TaskHandle_t mideDistancia_task_handle = NULL; //??
+TaskHandle_t mideDistancia_task_handle = NULL; //porque la tarea técnicamente todavía no existe
 
 void notifMaker(void* param); //declarar antes de definir -así el timer encuentra la función-
 
@@ -64,6 +64,8 @@ timer_config_t timer = {
 static void mideDistancia_Task(void){
 
 	while (1) {
+
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera la notificación
 
 		if (CONTROL) {
 
@@ -102,7 +104,7 @@ static void mideDistancia_Task(void){
 
 		}
 
-		vTaskDelay(150/portTICK_PERIOD_MS);
+
 
 	}
 
@@ -111,6 +113,8 @@ static void mideDistancia_Task(void){
 void notifMaker(void* param) {
     vTaskNotifyGiveFromISR(mideDistancia_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada (pasarle el handle, no el nombre de la función)*/
 }
+
+//Interrupciones
 
 static void atiendeControl (void) {
 
@@ -142,8 +146,6 @@ void app_main(void){
 //las funciones que atienden las interrupciones no se llaman manualmente, lo hace el micro cuando se produce la interrupción
 
 }
-
-
 
 /*==================[external functions definition]==========================*/
 
