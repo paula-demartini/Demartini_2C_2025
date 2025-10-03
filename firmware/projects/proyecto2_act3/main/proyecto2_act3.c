@@ -34,6 +34,8 @@
 #include "lcditse0803.h"
 #include "switch.h"
 #include "timer_mcu.h"
+#include "uart_mcu.h"
+
 /*==================[macros and definitions]=================================*/
 
 #define timerPeriod_us 1000000 //1 segundo
@@ -44,6 +46,7 @@ led_t vector_LEDS[3]={LED_1, LED_2, LED_3}; //vector de led_t
 
 /*==================[internal data definition]===============================*/
 
+TaskHandle_t UART_task = NULL;
 TaskHandle_t mideDistancia_task_handle = NULL; //porque la tarea técnicamente todavía no existe
 
 void notifMaker(void* param); //declarar antes de definir -así el timer encuentra la función-
@@ -70,6 +73,8 @@ static void mideDistancia_Task(void){
 		if (CONTROL) {
 
 			uint16_t distancia=HcSr04ReadDistanceInCentimeters(); //mide
+			UartSendString(UART_PC, (char *) UartItoa(distancia,10)); //no es necesario una tarea aparte para la transmisión serie
+			UartSendString(UART_PC, " cm\r\n"); //enviar dos strings seguidos  con la función es como enviar uno solo
 
 			if (HOLD) {
 				LcdItsE0803Write(distancia); //muestra por display
@@ -104,7 +109,6 @@ static void mideDistancia_Task(void){
 
 		}
 
-
 	}
 
 }
@@ -127,6 +131,14 @@ static void atiendeHold (void) {
 
 }
 
+serial_config_t UART = {
+
+	.port=UART_PC,
+	.baud_rate=9600, //cómo calculo los bauds?
+	.func_p=NULL,
+	.param_p=NULL,
+
+};
 
 void app_main(void){
     LedsInit(); //inicializa los leds
@@ -135,10 +147,11 @@ void app_main(void){
 	SwitchesInit(); //inicializa las teclas
 	TimerInit(&timer); //inicializa el timer
 	TimerStart(timer.timer); //arranca el timer
+	UartInit(&UART); //inicializa la UART
 
 //las interrupciones también podrían llamarse dentro de la definición de la tarea, antes del bucle
 
-	SwitchActivInt(SWITCH_1, atiendeControl, NULL); //interrupción que atiende la tecla 1 (CONTROL) //&atiendeControl?
+	SwitchActivInt(SWITCH_1, atiendeControl, NULL); //interrupción que atiende la tecla 1 (CONTROL)
 	SwitchActivInt(SWITCH_2, atiendeHold, NULL); //interrupción que atiende la tecla 2 (HOLD)
     xTaskCreate(&mideDistancia_Task, "Mide la distancia, maneja los leds y muestra por display", 2048, NULL, 5, &mideDistancia_task_handle);
 
@@ -149,3 +162,5 @@ void app_main(void){
 /*==================[external functions definition]==========================*/
 
 /*==================[end of file]============================================*/
+
+/*==================[internal functions declaration]=========================*/
