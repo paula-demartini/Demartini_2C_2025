@@ -17,7 +17,8 @@
  * | 	+5V 	 	|  	+5V     	|
  * | 	GND 	 	| 	GND 		|
  * 
- * | 	HC-SR04 	| 	EDU-ESP		|
+ * |    HC-SR04     |   EDU-ESP   	|
+ * |:--------------:|:--------------|
  * | 	ECHO 	 	| 	GPIO_3		|
  * | 	TRIGGER	 	| 	GPIO_2		|
  * | 	+5V 	 	| 	+5V 		|
