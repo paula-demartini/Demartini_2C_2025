@@ -1,25 +1,36 @@
-/*! @mainpage Template
- *
+/*! @mainpage Proyecto 2: actividad 3
  * @section genDesc General Description
  *
- * This section describes how the program works.
- *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ * Se suma a la actividad 2 puerto serie (se muestran por terminal de PC las mediciones y se emula la función de las teclas 1 y 2 con "O" y "H" respectivamente)
  *
  * @section hardConn Hardware Connection
  *
- * |    Peripheral  |   ESP32   	|
+ * |    LCD         |   EDU-ESP   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 	D1  	 	| 	GPIO_20		|
+ * | 	D2  	 	| 	GPIO_21		|
+ * | 	D3  	 	| 	GPIO_22		|
+ * | 	D4  	 	| 	GPIO_23		|
+ * | 	SEL_1	 	| 	GPIO_19		|
+ * | 	SEL_2	 	| 	GPIO_18		|
+ * | 	SEL_3	 	| 	GPIO_9		|
+ * | 	+5V 	 	|  	+5V     	|
+ * | 	GND 	 	| 	GND 		|
+ * 
+ * | 	HC-SR04 	| 	EDU-ESP		|
+ * | 	ECHO 	 	| 	GPIO_3		|
+ * | 	TRIGGER	 	| 	GPIO_2		|
+ * | 	+5V 	 	| 	+5V 		|
+ * | 	GND 	 	| 	GND     	|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 12/09/2025 | Document creation		                         |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Demartini Paula (paula.demartini@ingenieria.uner.edu.ar)
  *
  */
 
@@ -38,10 +49,24 @@
 
 /*==================[macros and definitions]=================================*/
 
+/** @def timerPeriod_us
+* @brief Periodo del timer en [us]
+*/
 #define timerPeriod_us 1000000 //1 segundo
 
-bool HOLD=true; 
+/** @def HOLD
+* @brief Booleano para congelar el display
+*/
+bool HOLD=true;
+
+/** @def CONTROL
+* @brief Booleano de control para detener o reanudar la medición
+*/
 bool CONTROL=true;
+
+/** @def vector_LEDS
+* @brief Vector de LEDS
+*/
 led_t vector_LEDS[3]={LED_1, LED_2, LED_3}; //vector de led_t
 
 /*==================[internal data definition]===============================*/
@@ -49,14 +74,12 @@ led_t vector_LEDS[3]={LED_1, LED_2, LED_3}; //vector de led_t
 TaskHandle_t UART_task = NULL;
 TaskHandle_t mideDistancia_task_handle = NULL; //porque la tarea técnicamente todavía no existe
 
-void notifMaker(void* param); //declarar antes de definir -así el timer encuentra la función-
+serial_config_t UART = {
 
-timer_config_t timer = { 
-
-	.timer = TIMER_A,
-	.period = timerPeriod_us,
-	.func_p = notifMaker,
-	.param_p = NULL,
+	.port=UART_PC,
+	.baud_rate=9600, //cómo calculo los bauds?
+	.func_p=NULL,
+	.param_p=NULL,
 
 };
 
@@ -64,17 +87,50 @@ timer_config_t timer = {
 
 /*==================[internal functions declaration]=========================*/
 
+/** @fn static void mideDistancia_Task(void)
+* @brief Tarea que enciende los leds según la distancia medida y muestra por display
+* @return void
+*/
+static void mideDistancia_Task(void);
+
+/** @fn void notifMaker(void)
+* @brief Función que crea las notificaciones para las tareas
+* @return void
+*/
+void notifMaker(void* param); //declarar antes de definir -así el timer encuentra la función-
+
+/** @fn void atiendeHold(void)
+* @brief Tarea que atiende la interrupción de tecla 2 (HOLD)
+* @return void
+*/
+static void atiendeHold (void);
+
+/** @fn void atiendeControl(void)
+* @brief Tarea que atiende la interrupción de tecla 1 (CONTROL)
+* @return void
+*/
+static void atiendeControl (void);
+
+timer_config_t timer = { 
+
+	.timer = TIMER_A,
+	.period = timerPeriod_us,
+	.func_p = notifMaker,			//acá sino no encuentra notifMaker
+	.param_p = NULL,
+
+};
+
 static void mideDistancia_Task(void){
 
 	while (1) {
 
-		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera la notificación
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera la notificación (tarea queda en BLOCKING)
 
 		if (CONTROL) {
 
 			uint16_t distancia=HcSr04ReadDistanceInCentimeters(); //mide
 			UartSendString(UART_PC, (char *) UartItoa(distancia,10)); //no es necesario una tarea aparte para la transmisión serie
-			UartSendString(UART_PC, " cm\r\n"); //enviar dos strings seguidos  con la función es como enviar uno solo
+			UartSendString(UART_PC, " cm\r\n"); //enviar dos strings seguidos con la función es como enviar uno solo
 
 			if (HOLD) {
 				LcdItsE0803Write(distancia); //muestra por display
@@ -131,14 +187,22 @@ static void atiendeHold (void) {
 
 }
 
-serial_config_t UART = {
+/*static void atiendeUART (uint8_t tecla) { //debería entrar habiéndose presionado cualquier tecla del teclado PC
 
-	.port=UART_PC,
-	.baud_rate=9600, //cómo calculo los bauds?
-	.func_p=NULL,
-	.param_p=NULL,
+	UartReadByte(UART_PC, &tecla);
 
-};
+	if (tecla=="H") {
+
+		HOLD=!HOLD;
+
+	} else if (tecla=="O") {
+
+		CONTROL=!CONTROL;
+
+	}
+
+}
+*/
 
 void app_main(void){
     LedsInit(); //inicializa los leds

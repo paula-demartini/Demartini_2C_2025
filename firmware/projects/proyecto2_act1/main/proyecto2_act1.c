@@ -1,29 +1,41 @@
-/*! @mainpage Template
- *
+/*! @mainpage Proyecto 2: actividad 1
  * @section genDesc General Description
  *
- * This section describes how the program works.
- *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ * Se encienden los leds según los intervalos indicados y se muestra por display la medición del sensor de ultrasonido. Además, se implementan CONTROL y HOLD con tecla 1 y tecla 2 respectivamente.
  *
  * @section hardConn Hardware Connection
  *
- * |    Peripheral  |   ESP32   	|
+ * |    LCD         |   EDU-ESP   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 	D1  	 	| 	GPIO_20		|
+ * | 	D2  	 	| 	GPIO_21		|
+ * | 	D3  	 	| 	GPIO_22		|
+ * | 	D4  	 	| 	GPIO_23		|
+ * | 	SEL_1	 	| 	GPIO_19		|
+ * | 	SEL_2	 	| 	GPIO_18		|
+ * | 	SEL_3	 	| 	GPIO_9		|
+ * | 	+5V 	 	|  	+5V     	|
+ * | 	GND 	 	| 	GND 		|
+ * 
+ * | 	HC-SR04 	| 	EDU-ESP		|
+ * | 	ECHO 	 	| 	GPIO_3		|
+ * | 	TRIGGER	 	| 	GPIO_2		|
+ * | 	+5V 	 	| 	+5V 		|
+ * | 	GND 	 	| 	GND     	|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 12/09/2025 | Document creation		                         |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Demartini Paula (paula.demartini@ingenieria.uner.edu.ar)
  *
  */
 
 /*==================[inclusions]=============================================*/
+
 #include <stdio.h>
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
@@ -36,13 +48,36 @@
 
 /*==================[macros and definitions]=================================*/
 
+/*==================[macros and definitions]=================================*/
+
+/** @def HOLD
+* @brief Booleano para congelar el display
+*/
 bool HOLD=true;
+
+/** @def CONTROL
+* @brief Booleano de control para detener o reanudar la medición
+*/
 bool CONTROL=true;
 
 /*==================[internal data definition]===============================*/
-TaskHandle_t mideDistancia_task_handle = NULL; //??
+
+TaskHandle_t mideDistancia_task_handle = NULL; 
 TaskHandle_t revisaTeclas_task_handle = NULL;
+
 /*==================[internal functions declaration]=========================*/
+
+/** @fn static void mideDistancia_Task(void)
+* @brief Tarea que enciende los leds según la distancia medida y muestra por display
+* @return void
+*/
+static void mideDistancia_Task(void);
+
+/** @fn static void revisaTeclas_task(void)
+* @brief Tarea que revisa las teclas y modifica los booleanos de control HOLD y CONTROL según corresponda
+* @return void
+*/
+static void revisaTeclas_task (void);
 
 static void mideDistancia_Task(void){
 
@@ -86,7 +121,7 @@ static void mideDistancia_Task(void){
 
 		}
 
-		vTaskDelay(150/portTICK_PERIOD_MS);
+		vTaskDelay(1000/portTICK_PERIOD_MS); //refresco de medición cada 1s (en ms)
 
 	}
 
@@ -114,12 +149,10 @@ static void revisaTeclas_task (void) {
 
 		}
 
-		vTaskDelay(25/portTICK_PERIOD_MS);
+		vTaskDelay(250/portTICK_PERIOD_MS);
 	}
 
 }
-
-
 
 void app_main(void){
     LedsInit(); //inicializa los leds
@@ -129,7 +162,6 @@ void app_main(void){
     xTaskCreate(&mideDistancia_Task, "Mide la distancia, maneja los leds y muestra por display", 2048, NULL, 5, &mideDistancia_task_handle);
     xTaskCreate(&revisaTeclas_task, "Revisa las teclas", 2048, NULL, 5, &revisaTeclas_task_handle);
 }
-
 
 
 /*==================[external functions definition]==========================*/

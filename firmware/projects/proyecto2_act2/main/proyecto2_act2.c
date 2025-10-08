@@ -1,25 +1,36 @@
-/*! @mainpage Template
- *
+/*! @mainpage Proyecto 2: actividad 2
  * @section genDesc General Description
  *
- * This section describes how the program works.
- *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ * Se implementa la actividad 1 pero ahora con interrupciones y timer.
  *
  * @section hardConn Hardware Connection
  *
- * |    Peripheral  |   ESP32   	|
+ * |    LCD         |   EDU-ESP   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 	D1  	 	| 	GPIO_20		|
+ * | 	D2  	 	| 	GPIO_21		|
+ * | 	D3  	 	| 	GPIO_22		|
+ * | 	D4  	 	| 	GPIO_23		|
+ * | 	SEL_1	 	| 	GPIO_19		|
+ * | 	SEL_2	 	| 	GPIO_18		|
+ * | 	SEL_3	 	| 	GPIO_9		|
+ * | 	+5V 	 	|  	+5V     	|
+ * | 	GND 	 	| 	GND 		|
+ * 
+ * | 	HC-SR04 	| 	EDU-ESP		|
+ * | 	ECHO 	 	| 	GPIO_3		|
+ * | 	TRIGGER	 	| 	GPIO_2		|
+ * | 	+5V 	 	| 	+5V 		|
+ * | 	GND 	 	| 	GND     	|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 12/09/2025 | Document creation		                         |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Demartini Paula (paula.demartini@ingenieria.uner.edu.ar)
  *
  */
 
@@ -36,17 +47,29 @@
 #include "timer_mcu.h"
 /*==================[macros and definitions]=================================*/
 
+/** @def timerPeriod_us
+* @brief Periodo del timer en [us]
+*/
 #define timerPeriod_us 1000000 //1 segundo
 
-bool HOLD=true; 
+/** @def HOLD
+* @brief Booleano para congelar el display
+*/
+bool HOLD=true;
+
+/** @def CONTROL
+* @brief Booleano de control para detener o reanudar la medición
+*/
 bool CONTROL=true;
+
+/** @def vector_LEDS
+* @brief Vector de LEDS
+*/
 led_t vector_LEDS[3]={LED_1, LED_2, LED_3}; //vector de led_t
 
 /*==================[internal data definition]===============================*/
 
 TaskHandle_t mideDistancia_task_handle = NULL; //porque la tarea técnicamente todavía no existe
-
-void notifMaker(void* param); //declarar antes de definir -así el timer encuentra la función-
 
 timer_config_t timer = { 
 
@@ -60,6 +83,30 @@ timer_config_t timer = {
 //idk por qué la otra sintaxis no funciona
 
 /*==================[internal functions declaration]=========================*/
+
+/** @fn static void mideDistancia_Task(void)
+* @brief Tarea que enciende los leds según la distancia medida y muestra por display
+* @return void
+*/
+static void mideDistancia_Task(void);
+
+/** @fn void notifMaker(void)
+* @brief Función que crea las notificaciones para las tareas
+* @return void
+*/
+void notifMaker(void* param); //declarar antes de definir -así el timer encuentra la función-
+
+/** @fn void atiendeHold(void)
+* @brief Tarea que atiende la interrupción de tecla 2 (HOLD)
+* @return void
+*/
+static void atiendeHold (void);
+
+/** @fn void atiendeControl(void)
+* @brief Tarea que atiende la interrupción de tecla 1 (CONTROL)
+* @return void
+*/
+static void atiendeControl (void);
 
 static void mideDistancia_Task(void){
 
@@ -130,7 +177,7 @@ static void atiendeHold (void) {
 
 void app_main(void){
     LedsInit(); //inicializa los leds
-	LcdItsE0803Init(); //inicializa los displays(?)
+	LcdItsE0803Init(); //inicializa los displays
 	HcSr04Init(GPIO_3, GPIO_2); //inicializa el sensor
 	SwitchesInit(); //inicializa las teclas
 	TimerInit(&timer); //inicializa el timer
