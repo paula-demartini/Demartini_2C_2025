@@ -8,7 +8,7 @@
  * |  Potenciómetro |   EDU-ESP  |
  * |:--------------:|:-----------|
  * | 	Vcc 	 	| 	+3,3V 	 |
- * | 	Middle 	 	| 	CH1 	 |
+ * | 	Centro 	 	| 	CH1 	 |
  * | 	GND 	 	| 	GND      |
  *
  *
