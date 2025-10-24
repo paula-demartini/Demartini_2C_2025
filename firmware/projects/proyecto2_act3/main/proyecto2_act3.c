@@ -75,15 +75,6 @@ led_t vector_LEDS[3]={LED_1, LED_2, LED_3}; //vector de led_t
 TaskHandle_t UART_task = NULL;
 TaskHandle_t mideDistancia_task_handle = NULL; //porque la tarea técnicamente todavía no existe
 
-serial_config_t UART = {
-
-	.port=UART_PC,
-	.baud_rate=9600, //cómo calculo los bauds?
-	.func_p=atiendeUART,
-	.param_p=NULL,
-
-};
-
 //idk por qué la otra sintaxis no funciona
 
 /*==================[internal functions declaration]=========================*/
@@ -112,12 +103,27 @@ static void atiendeHold (void);
 */
 static void atiendeControl (void);
 
+/** @fn void atiendeUART(void *param)
+* @brief Tarea que atiende la interrupción de UART
+* @return void
+*/
+static void atiendeUART (void *param);
+
 timer_config_t timer = { 
 
 	.timer = TIMER_A,
 	.period = timerPeriod_us,
 	.func_p = notifMaker,			//acá sino no encuentra notifMaker
 	.param_p = NULL,
+
+};
+
+serial_config_t UART = {
+
+	.port=UART_PC,
+	.baud_rate=9600, //cómo calculo los bauds?
+	.func_p=atiendeUART,
+	.param_p=NULL,
 
 };
 
@@ -194,11 +200,11 @@ static void atiendeUART (void *param) { //debería entrar habiéndose presionado
 	uint8_t tecla;
 	UartReadByte(UART_PC, &tecla);
 
-	if (tecla=="H") {
+	if (tecla=='H') {
 
 		HOLD=!HOLD;
 
-	} else if (tecla=="O") {
+	} else if (tecla=='O') {
 
 		CONTROL=!CONTROL;
 
