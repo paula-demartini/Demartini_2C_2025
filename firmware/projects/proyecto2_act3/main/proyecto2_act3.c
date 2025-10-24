@@ -79,7 +79,7 @@ serial_config_t UART = {
 
 	.port=UART_PC,
 	.baud_rate=9600, //cómo calculo los bauds?
-	.func_p=NULL,
+	.func_p=atiendeUART,
 	.param_p=NULL,
 
 };
@@ -188,8 +188,10 @@ static void atiendeHold (void) {
 
 }
 
-/*static void atiendeUART (uint8_t tecla) { //debería entrar habiéndose presionado cualquier tecla del teclado PC
 
+static void atiendeUART (void *param) { //debería entrar habiéndose presionado cualquier tecla del teclado PC
+
+	uint8_t tecla;
 	UartReadByte(UART_PC, &tecla);
 
 	if (tecla=="H") {
@@ -203,7 +205,6 @@ static void atiendeHold (void) {
 	}
 
 }
-*/
 
 void app_main(void){
     LedsInit(); //inicializa los leds
